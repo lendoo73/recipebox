@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=yes" />
+    <link rel="stylesheet" href="style/style.css" />
+    <link rel="stylesheet" href="style/footer.css" />
+    <title>Build a Recipe Box</title>
+</head>
+<body>
+    <div class="modalHack hide"></div>
+    <header><h2>Build a Recipe Box</h2></header>
+    <span id="closeSearchMode" title="Close search bar">&times;</span>
+    <section>
+        <div id="nav-container">
+            <nav class="left">
+                <div id="loginMenu" class="menu">
+                    Login<img class="iconRight" src="icons/login.svg" />
+                </div>
+                <div id="recipesMenu" class="menu">
+                    Recipes<img class="iconRight" src="icons/recipes.png" />
+                </div>
+                <div id="search" class="menu">
+                    Search<img class="iconRight" src="icons/search.svg" />
+                </div>
+                <div id="addRecipe" class="menu">
+                    Add Recipe<img class="iconRight" src="icons/add.png" />
+                </div>
+            </nav>
+            <nav class="right">
+                <div class="loginMenu hide">
+                    <div id="login" class="menu">
+                        Login
+                    </div>
+                    <div id="register" class="menu">
+                        Register
+                    </div>
+                </div>
+                <div class="recipesMenu">
+                    <div id="breads" class="menu">
+                        Bakery<img class="iconLeft" src="icons/bakery.png" />
+                    </div>
+                    <div id="salads" class="menu">
+                        Salads, Dressings...<img class="iconLeft" src="icons/salad.png" />
+                    </div>
+                    <div id="soups" class="menu">
+                        Soups, Stews & Chili<img class="iconLeft" src="icons/soup.png" />
+                    </div>
+                    <div id="mainDishes" class="menu">
+                        Main dishes<img class="iconLeft" src="icons/dinner-s.png" />
+                    </div>
+                    <div id="desserts" class="menu">
+                        Desserts<img class="iconLeft" src="icons/dessert.png" />
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <article>
+            <div class="book-container">
+                <div id="loginBook"><!-- Created with javascript --></div>
+                <div id="recipeBook"><!-- Created with javascript --></div>
+            </div>
+        </article>
+    </section>
+    <script src="js/index.js" type="module"></script>
+</body>    
+</html>
+
+<!--
+add recipe icon: logomakr.com/2tl5fW
+
+
+-->
+
+<!--
+challenge: how to check if eventlistener already attached to an element?
+-->
