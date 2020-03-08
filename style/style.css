@@ -1,0 +1,525 @@
+* {
+    --backgroundColor: #191966;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    overflow-x: hidden;
+/*    user-select: none;*/
+}
+
+.modalHack {
+    position: fixed; /* Stay in place */
+    z-index: 0; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0 ,0 ,0 , 0); /* Black w/ opacity */
+}
+
+header {
+    text-align: center;
+    color: var(--backgroundColor);
+    border-bottom: 1px solid var(--backgroundColor);
+    box-shadow: 0px 6px 13px 0px rgba(0, 0, 0, 0.8);
+    margin-top: -20px;
+    padding-top: 20px;
+}
+
+body > .edit-mode-on {
+	background-color: yellow;
+}
+
+body > .delete-mode-on {
+	background-color: red;
+    color: white;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+/*  --------------------    left side navigation    --------------------    */
+.iconRight, .iconLeft {
+    float: right;
+    margin: 1px 0 0 0px;
+    width: 46px;
+    height: 46px;
+}
+
+.iconLeft {
+    float: left;
+}
+
+.hide {
+    display: none;
+}
+
+nav.left .menu,
+nav.right .menu {
+    z-index: 100000000;
+    position: absolute;
+    display: inline-block;
+    height: 50px;
+    line-height: 50px;
+    border: 1px solid var(--backgroundColor);
+    color: white;
+    font-size: 20px;
+    transition: 0.3s;
+    
+}
+
+nav.left .menu {
+    padding: 0px 2px 0px 15px;
+    width: 140px;
+    left: -88px;
+    border-radius: 0 50px 50px 0;
+    box-shadow: -7px 6px 13px 0px rgba(0, 0, 0, 0.8);
+}
+
+nav.left .menu:hover,
+#addRecipe:hover {
+    left: 0;
+}
+
+#loginMenu {
+    top: 90px;
+    background-color: var(--backgroundColor);
+}
+
+#recipesMenu {
+    top: 150px;
+    border-radius: 0 5px 5px 0;
+    background-color: #808000;
+}
+
+#search {
+    top: 450px;
+    background-color: #b3b3b3;
+}
+
+#addRecipe {
+    top: 510px;
+    border-radius: 0 50px 50px 0;
+    background-color: #00a521;
+    width: 165px;
+    left: -113px;
+}
+
+#addRecipe:active {
+    background-color: #007217;
+}
+
+/*  --------------------    right side navigation    --------------------    */
+nav.right .menu {
+    padding: 0px 2px 0px 2px;
+    right: -203px;
+    width: 255px;
+    border-radius: 5px 0 0 5px ;
+    box-shadow: 7px 6px 13px 0px rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
+
+nav.right .menu:hover, #salads:hover {
+    right: 0;
+}
+
+/*  login  */
+#login {
+    top: 90px;
+    background-color: #e6e6e6;
+    color: darkslategrey;
+}
+
+#register {
+    top: 150px;
+    background-color: var(--backgroundColor);
+}
+
+
+/*  recipes  */
+#breads {
+    top: 90px;
+    background-color: #ffcc9a;
+    color: brown;
+}
+
+#breads img, #desserts img {
+	width: 60px;
+    height: 60px;
+    margin: -5px;
+}
+
+#salads {
+    top: 150px;
+    background-color: #e6e6e6;
+    color: darkslategrey;
+}
+
+#soups {
+    top: 210px;
+    background-color: #007217;
+}
+
+#mainDishes {
+    top: 270px;
+    background-color: #8f1c5b;
+}
+
+#desserts {
+    top: 330px;
+    background-color: var(--backgroundColor);
+}
+
+/*  --------------------    searching mode    --------------------    */
+#searchInputContainer {
+    display: flex;
+    justify-content: center;
+}
+
+#filterContainer {
+    
+}
+
+#searchInput {
+    padding: 6px;
+    margin-top: 8px;
+    font-size: 17px;
+    width: 0px;
+    opacity: 0;
+    transition: 1s;
+    background-color: azure;
+    height: auto;
+    border:solid 7px;
+    border-bottom-color:#ffe;
+    border-left-color:#eed;
+    border-right-color:#eed;
+    border-top-color:#ccb;   
+}
+
+#searchInput:focus {
+    outline: none;
+}
+
+#searchInputContainer img {
+    width: 45px;
+    cursor: pointer;
+}
+
+
+#searchResultContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 0 53px; 
+}
+
+#searchResultContainer > div {
+    width: 250px;
+/*    margin: 1px;*/
+    text-align: center;
+    line-height: 30px;
+    border: 1px solid black;
+    border-radius: 25px;
+    margin-bottom: 1px;
+    cursor: pointer;
+}
+
+/* The Close Button */
+#closeSearchMode {
+    display: none;
+    color: red;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+#closeSearchMode:hover,
+#closeSearchMode:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/*  --------------------    flip-book    --------------------    */
+.book-container {
+    margin-top: 20px;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+}
+
+.flip-book-inner {
+    transform: translate(0);
+	transition: 0.3s ease-in-out;
+}
+
+h1 {
+    text-align: center;
+}
+
+#book {
+	display: flex;
+}
+
+/*  --------------------    style scrollbar    --------------------    */
+/* width */
+::-webkit-scrollbar {
+    width: 20px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey; 
+    border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2); 
+}
+
+/*  --------------------    cover    --------------------    */
+/*  to position center the image of cover  */
+[id$=Cover] {
+    display: flex;
+    justify-content: center;
+/*    align-items: center;*/
+}
+
+/*  to change the width of cover image  */
+[id$=Cover] > div {
+    width: 70%;    
+}
+
+[id$=Cover] img {
+    width: 100%;
+}
+
+/*  style login book cover image  */
+#loginCover {
+    background-color: #808000;
+    border-radius: 2vw;
+}
+
+.rounded-border {
+    background-color: white;
+    border: 1.1vw solid white;
+}
+
+/*  --------------------    pages    --------------------    */
+/*  gradient between the pages  */
+.book-container .front:not([id^=cover]) {
+    border-left-width: 20px;
+    border-left-style: solid;
+    border-image: linear-gradient(to right, rgba(200, 200, 200, 1), 
+                                            rgba(200, 200, 200, 0.1), 
+                                            rgba(0, 0, 0, 0), 
+                                            rgba(0, 0, 0, 0)) 1 100%;
+}
+
+.book-container .front > div {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+.book-container .back {
+	background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* style cover text  */
+.book-container [id$=Cover] h1 {
+    font-size: 26px;
+    color: white;
+}
+
+/*  select ID that begins content   */
+[id^=content] {
+    margin-top: 20px;
+    color: black;
+    height: 88%; /* set the content height of page */
+}
+
+[id^=content] h1 {
+    font-size: 26px;
+}
+
+[id^=content] h1,
+[id^=content] ul,
+[id^=content] ol {
+    transition: 0.5s;
+}
+
+[id^=content] h3 {
+    padding-left: 5px;
+}
+
+[id^=content] ol  {
+    text-align: justify;
+}
+
+/*  --------------------    Style edit mode    --------------------    */
+/*  style edit icon  */
+.book-container .edit-container {
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    top: -15px;
+    left: -30px;
+    width: 100%;
+    transition: 1s;
+}
+
+/*  edit icon and delete icon  */
+.book-container .edit-container img {
+    width: 85%;
+    margin: 15px;
+}
+
+.book-container .edit-mode-on,
+.book-container .delete-mode-on {
+    top: -95px;
+    left: -120%;
+    width: 85vw;
+}
+
+/*  style the edit icon and delete icon  */
+.book-container .edit-container > div {
+    width: 50px;
+    line-height: 50px;
+}
+
+.book-container .edit-container > div img {
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.book-container .edit:hover {
+    background-color: yellow;
+    box-shadow: -7px 6px 13px 0px rgba(0, 0, 0, 0.8);
+}
+
+.editable,
+.editShadow {
+    border: 1px solid yellow;
+    box-shadow: 7px 6px 13px 0px rgba(0, 0, 0, 0.8);
+}
+
+.editable {
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    cursor: pointer;
+}
+
+/*  ingredients table  */
+[id^=content] ul table {
+    width: 35vw;
+    margin-left: -40px;
+    border-collapse: separate;
+    cursor: pointer;
+}
+
+[id^=content] ul table td {
+    border: 1px solid black;
+    outline: 1px solid yellow;
+    padding: 4px;
+}
+
+.delete-ingredient-row {
+    color: red;
+    font-size: 1.5em;
+    font-weight: 900;
+    text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+.delete-ingredient-row:hover {
+    background-color: red;
+    color: white;
+/*    font-size: 1.5em;*/
+/*    font-weight: 900;*/
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.move-ingredient-row {
+    background-color: lightgreen;
+    color: black;
+/*    font-size: 1.1em;*/
+/*    font-weight: 900;*/
+    text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+/*  delete icon  */
+.book-container .delete:hover {
+    background-color: red;
+    box-shadow: 7px 6px 13px 0px rgba(0, 0, 0, 0.8);
+}
+
+#editStyle {
+    padding: 15px;
+    margin-top: 30px;
+    margin-left: 25px;
+    height: 100%;
+    overflow: auto;
+}
+
+#editStyle h1 {
+	text-align: center;
+}
+
+#editStyle p {
+    padding: 10px;
+}
+
+#editStyle input {
+    cursor: pointer;
+}
+
+#editStyle input[type=url] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    cursor: text;
+}
+
+/*  --------------------    style Back side of recipes    --------------------    */
+[id$=Back] > div {
+    background-color: white;
+    border: 0.5vw solid white;
+    margin: 0 10px;
+    height: 100%;
+    cursor: default;
+}
+
+[id$=Back] a {
+    color: white;
+    text-decoration: none;
+}
+
+#backSideRecipe {
+    height: 95%;
+    overflow-y: auto;
+    background-color: #808000;
+    border-radius: 2vw;
+    margin: 10px;
+    padding: 10px;
+}
+
+#backSideRecipe button {
+    background-color: white;
+}

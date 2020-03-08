@@ -1,0 +1,30 @@
+/*  --------------------    Style footer    --------------------    */
+footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    --fccGreen: #006600;
+    color: white;
+    text-align: left;
+    padding: 8px;
+    font-family: sans-serif;
+    border-top: 1px solid black;
+    transition: 1s;
+    font-size: 12px;
+}
+
+footer:hover {   
+    background-color: var(--fccGreen);
+}
+
+footer a {
+    color: white;
+    text-decoration: none;
+}
+
+footer img {
+    width: 40px;
+    margin: -10px 10px;
+    float: right;
+}
