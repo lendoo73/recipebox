@@ -81,7 +81,7 @@ const refreshRecipeBook = (pageContent, openHere = null) => {
                     <li>a database where the recipes stored</li>
                     <li>and maybe forum for all recipes where users can share their experiences</li>
                 </ul>
-                <p>If you have any suggestion, please contact me on [filled later]</p>
+                <p>If you have any suggestion, please contact me on <a href="https://www.freecodecamp.org/forum/t/build-a-recipe-box-my-recipe-book/357043" target="_blank">the FCC forum.</a></p>
                 <p>Anything went wrong? <button id="resetWebStorage" title="This will delete all stored recipes by you and replace the original set!">Click here</button> to reset your webstorage.</p>
             </div>
         </div>
