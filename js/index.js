@@ -1,6 +1,6 @@
 "use strict";
 import {FlipBook} from "./flipbook.js";
-import {dataset} from "./dataset.js";
+import {dataset, newRecipe} from "./dataset.js";
 import {callAJAX} from "./ajax.js";
 import * as updateBook from "./updatebook.js";
 import * as searching from "./searching.js";
