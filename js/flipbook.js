@@ -147,6 +147,10 @@ class FlipBook {
         }
         
         // Add click event to the Cover to open the book:
+        console.log("z-index issue???", this.book.cover);
+        console.log("right-click on cover: -> inspect Element", this.book.cover);
+        console.log("this is the sheet 5, but z-index looks all right!", this.book.cover);
+        console.log(this.book.cover.parentElement.style.zIndex);
         this.book.cover.addEventListener("click", () => {
             this.nextSheet(); 
         });

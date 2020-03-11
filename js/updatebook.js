@@ -59,6 +59,7 @@ export const createRecipeContent = (name, ingredientsArray, directions, editable
     });
     recipeContent += `
         <h1>${name}</h1>
+        <h3 class="hide"></h3>
         <h3>Ingredients:</h3>
         <ul>${ingredientsList}</ul>
         <h3>Directions:</h3>
@@ -75,6 +76,18 @@ const createIngredientsList = ingredientsArray => {
     return ingredientsList;
 }
 
+export const sendAlert = (message, type) => {
+    const alertBox = document.getElementById("alertBox");
+    alertBox.className = "";
+    alertBox.style.display = "block";
+    alertBox.innerHTML = message;
+    alertBox.classList.add(type);
+    setTimeout(() => {
+        alertBox.style.display = "none";
+    }, 5000);
+};
+    
+
 //  -----------------------------------    Edit recipe    -----------------------------------  
 export const editRecipe = (recipes, recipeIndex) => {
 //    console.log(event);
@@ -88,7 +101,7 @@ export const editRecipe = (recipes, recipeIndex) => {
     // browser compatibility issue: firefox not support event.path
     const rightPage = event.target.parentElement.parentElement.parentElement.parentElement.parentElement,
           rightInnerContaniner = event.target.parentElement.parentElement.parentElement.parentElement,
-          rightContentContainer = event.target.parentElement.parentElement.parentElement,
+          rightContentContainer = event.target.offsetParent.parentElement,
           editContainer = event.target.parentElement.parentElement
     ;
     const bgColor = rightInnerContaniner.style.backgroundColor,
@@ -99,7 +112,8 @@ export const editRecipe = (recipes, recipeIndex) => {
           nextButton = rightInnerContaniner.children[1],
           backButton = rightPage.previousElementSibling.children[1].children[1],
           recipeName = rightContentContainer.children[1],
-          ingredients = rightContentContainer.children[3],
+          selectCategory = rightContentContainer.children[2],
+          ingredients = rightContentContainer.children[4],
           directions = rightContentContainer.children[5],
           leftSideContent = rightPage.previousElementSibling.children[1].children[0]
     ;
@@ -117,21 +131,46 @@ export const editRecipe = (recipes, recipeIndex) => {
         return input.replace(/\s+(?=\s)|&nbsp;|<\/?[\w\s="/.':;#-\/]+>|&lt;\/?[\w\s="/.':;#-\/]+&gt;/gi, "").trim();
     };
     
-    
+    //  -----------------------------------    Edit name    -----------------------------------  
     const changeName = () => {
 //        console.log(event.target.innerText);
         const updated = sanitizeInput(event.target.innerText);
         if (updated !== currentRecipe.name) {
             if (updated) {
                 currentRecipe.name = updated;
-                refreshStorage(recipes, currentRecipe);
+                refreshStorage(currentRecipe);
                 event.target.innerText = updated;
                 header.textContent = "The name has been changed.";
             } else {
                 event.target.innerText = currentRecipe.name;
-                header.textContent = "The name cannot be left blank!";
+                sendAlert("The name cannot be left blank!", "warning");
             }
         } 
+    };
+    
+    //  -----------------------------------    Edit category    -----------------------------------  
+    const categorySelector = () => {
+        // show categories:
+        selectCategory.innerHTML = `
+            <label for="category">Category: </label>
+            <select id="category">
+                <option value="bakery">Bakery</option>
+                <option value="salads">Salads, Dressings...</option>
+                <option value="soups">Soups, Stews & Chili</option>
+                <option value="mainDishes">Main dishes</option>
+                <option value="desserts">Desserts</option>
+            </select>
+        `;
+        const currentCategory = currentRecipe.category;
+        dom.category = document.getElementById("category");
+        document.querySelector(`#category > [value=${currentCategory}]`).setAttribute("selected", "selected");
+        // add event listener to the category selector:
+        dom.category.addEventListener("change", () => {
+//            console.log(event);
+            currentRecipe.category = event.target.value;
+            refreshStorage(currentRecipe);
+            refreshCategoryShadow(currentRecipe);
+        });
     };
     
     //  -----------------------------------    Edit ingredients    -----------------------------------  
@@ -210,11 +249,11 @@ export const editRecipe = (recipes, recipeIndex) => {
                 ingredientsArray.push([quantity, unit, ingredient]);
                 // refresh table:
                 ingredientsTable();
-                refreshStorage(recipes, currentRecipe);
+                refreshStorage(currentRecipe);
             }
         } else if (updated !== ingredientsArray[row][column]) {
             ingredientsArray[row][column] = updated;
-            refreshStorage(recipes, currentRecipe);
+            refreshStorage(currentRecipe);
         }
     };
     
@@ -231,7 +270,7 @@ export const editRecipe = (recipes, recipeIndex) => {
 //        console.log(event);
         const row = event.target.dataset.row;
         ingredientsArray.splice(row, 1);
-        refreshStorage(recipes, currentRecipe);
+        refreshStorage(currentRecipe);
         // refresh table:
         ingredientsTable();
         header.textContent = "Edite mode: ON";
@@ -319,7 +358,7 @@ export const editRecipe = (recipes, recipeIndex) => {
         
         if (lastRow === dropRow ||
             previousRow === dropRow) return; // to turn editable the cell
-        refreshStorage(recipes, currentRecipe);
+        refreshStorage(currentRecipe);
         ingredientsTable(); // important to refresh all listener or generate bugfix!!!
     };
     
@@ -345,7 +384,7 @@ export const editRecipe = (recipes, recipeIndex) => {
                 directionsArray[i] = currentContent;
             }
         }
-        if (updated) refreshStorage(recipes, currentRecipe);
+        if (updated) refreshStorage(currentRecipe);
     };
     
     // toggle edit mode style on/off:
@@ -354,8 +393,10 @@ export const editRecipe = (recipes, recipeIndex) => {
     backButton.classList.toggle("hide");
     modalHack.classList.toggle("hide");
     recipeName.classList.toggle("editable");
+    selectCategory.classList.toggle("hide");
     // create table to edit ingredients:
     ingredientsTable();
+    categorySelector();
     dom.table = document.querySelector("[id^=content] ul table");
     directions.classList.toggle("editable");
     editContainer.classList.toggle("edit-mode-on"); // move top left the edit icon
@@ -430,7 +471,7 @@ export const editRecipe = (recipes, recipeIndex) => {
                 // valid url
                 dom.inputUrl.style.background = "PaleGreen";
                 currentRecipe.image.backgroundImage = `url("${event.target.value}")`;
-                refreshStorage(recipes, currentRecipe);
+                refreshStorage(currentRecipe);
                 event.target.offsetParent.style.backgroundImage = currentRecipe.image.backgroundImage;
             } else {
                 // invalid url
@@ -446,7 +487,7 @@ export const editRecipe = (recipes, recipeIndex) => {
                 currentRecipe.image.backgroundSize = event.target.value;
                 currentRecipe.image.backgroundRepeat = "no-repeat";
                 currentRecipe.image.backgroundSize = event.target.value;
-                refreshStorage(recipes, currentRecipe);
+                refreshStorage(currentRecipe);
                 event.target.offsetParent.style.backgroundSize = event.target.value;
                 dom.editStyle.style.backgroundColor = "transparent";
                 dom.editStyle.style.color = "transparent";
@@ -463,7 +504,7 @@ export const editRecipe = (recipes, recipeIndex) => {
 //            console.log(event);
             currentRecipe.content.stylePage.backgroundColor = event.target.value;
             rightInnerContaniner.style.backgroundColor = event.target.value;
-            refreshStorage(recipes, currentRecipe);
+            refreshStorage(currentRecipe);
         });
         
         // add change event to the text color input:
@@ -471,7 +512,7 @@ export const editRecipe = (recipes, recipeIndex) => {
         dom.recipeTextColor.addEventListener("change", () => {
             currentRecipe.content.styleContent.color = event.target.value;
             rightContentContainer.style.color = event.target.value;
-            refreshStorage(recipes, currentRecipe);
+            refreshStorage(currentRecipe);
         });
         
     } else {
@@ -479,6 +520,7 @@ export const editRecipe = (recipes, recipeIndex) => {
         
         // have to remove all event listener
         recipeName.removeEventListener("blur", changeName);
+        selectCategory.innerHTML = ``; // empty the previous options
         dom.tdAll.forEach((cell, index) => {
             if ((index + 1) % 4 === 0) {
                 // these cells are the delete buttons:
@@ -562,7 +604,7 @@ export const deleteRecipe = (recipes, recipeIndex) => {
         deleteModeEnd();
         // delete the recipe now:
         recipes.splice(recipeIndex, 1);
-        refreshStorage(recipes, currentRecipe);
+        refreshStorage(currentRecipe);
         document.getElementById("closeSearchMode").click(); // to close search mode
         recipes = JSON.parse(localStorage.getItem("myRecipes"));
         return true;
@@ -570,15 +612,28 @@ export const deleteRecipe = (recipes, recipeIndex) => {
 };
 
 // refresh the local storage:
-const refreshStorage = (recipes, currentRecipe) => {
+const refreshStorage = currentRecipe => {
+    const myRecipes = JSON.parse(localStorage.getItem("myRecipes"));
+    console.log("myRecipes", myRecipes);
+    console.log("currentRecipe", currentRecipe);
     // current recipe validation before saving:
     if (currentRecipe.name !== "My new recipe" &&
         currentRecipe.content.ingredients.length &&
         currentRecipe.content.directions[0] !== " ") {
-        localStorage.setItem("myRecipes", JSON.stringify(recipes));
+        myRecipes[currentRecipe.id] = currentRecipe;
+        localStorage.setItem("myRecipes", JSON.stringify(myRecipes));
+    } else {
+        // inform the user why not saved the recipe:
     }
-    
 };
+
+export const refreshCategoryShadow = (currentRecipe = null) => {
+    const allCategories = document.querySelectorAll(".recipesMenu .menu");
+    allCategories.forEach(button => button.style.boxShadow = "7px 6px 13px 0px rgba(0, 0, 0, 0.8)");
+    if (currentRecipe) {
+        document.getElementById(currentRecipe.category).style.boxShadow = "7px 6px 13px 0px rgba(0, 255, 0, 0.8)";
+    }
+}
     
 const namedColorToHex = namedColor => {
     const html = document.querySelector("html");

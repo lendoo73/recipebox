@@ -8,11 +8,21 @@ import {updateFooter} from "./footer.js";
 
 let activeBook = "recipeBook", // to control wich book will be opened
     coverContent,                   // to fill the book cover
-    recipeBook,
-    searchMode = false
+    recipeBook = {},
+    searchMode = false,
+    recipes = dataset
 ;
 
-let recipes = dataset;
+const dom = {
+    header: document.querySelector("body header"),
+    allCategories: document.querySelectorAll(".recipesMenu .menu"),
+    recipesMenu: document.getElementById("recipesMenu"),
+    loginMenu: document.getElementById("loginMenu"),
+    loginBook: document.getElementById("loginBook"),
+    search: document.getElementById("search"),
+    closeSearchMode: document.getElementById("closeSearchMode"),
+    addRecipe: document.getElementById("addRecipe")
+};
 
 if (typeof(Storage) !== undefined) {
 //    console.log("storage usable");
@@ -21,18 +31,10 @@ if (typeof(Storage) !== undefined) {
     }
     recipes = JSON.parse(localStorage.getItem("myRecipes"));
 } else {
-    console.log("Sorry! No Web Storage supported...");
+    // inform the user if the browser not support webstorage:
+    updateBook.sendAlert("Sorry! No Web Storage supported...", "error");
 } 
 
-const dom = {
-    header: document.querySelector("body header"),
-    recipesMenu: document.getElementById("recipesMenu"),
-    loginMenu: document.getElementById("loginMenu"),
-    loginBook: document.getElementById("loginBook"),
-    search: document.getElementById("search"),
-    closeSearchMode: document.getElementById("closeSearchMode"),
-    addRecipe: document.getElementById("addRecipe")
-};
 
 //  --------------------    Login book    --------------------   
 dom.loginBook.style.display = "none";
@@ -55,20 +57,26 @@ coverContent = `
 loginBook.addContent("cover", coverContent);
 
 //  --------------------    Recipe book    -------------------- 
-// coverContent: string, pageContent: array, openHere: number
+// coverContent: string, pageContent: array, openHere: number (optional)
 const refreshRecipeBook = (pageContent, openHere = null) => {
     recipeBook = null ; // have to delete all previous data from the book
+//    console.log(recipeBook.book);
     recipeBook = new FlipBook("#recipeBook");
     activeBook = recipeBook;
     
     let ingredients, // array
         directions // array
     ;
-    
+    let title = "";
+    if (pageContent.length < recipes.length) {
+        // change title:
+        title = document.getElementById(pageContent[0].category).textContent;
+    }
     const coverContent = `
         <div>
             <img src="image/cover.svg" />
             <h1>My Recipe Box</h1>
+            <h2>${title}</h2>
         </div>
     `, backContent = `
         <div>
@@ -97,8 +105,20 @@ const refreshRecipeBook = (pageContent, openHere = null) => {
         width: "40vw",
         height: "80vh"
     });
-    console.log(recipeBook);
+//    console.log(recipeBook);
     recipeBook.executable = () => {
+//        console.log("executable", event);
+        
+        let index = recipeBook.currentSheet - 1;
+        if (event.target.classList.value === "back-btn") index --; // executable called before decreasing
+        if (index < recipeBook.sheet &&
+            index < pageContent.length &&
+            index > -1) {
+            // change shadow of the active category:
+            updateBook.refreshCategoryShadow(pageContent[index]);
+        } else {
+            updateBook.refreshCategoryShadow();
+        }
         if (recipeBook.currentSheet < 2) return;
         if (event.target.innerText === "Next") {
             const prevEditContainer = event.target.parentElement.firstElementChild.firstElementChild;
@@ -180,6 +200,9 @@ const refreshRecipeBook = (pageContent, openHere = null) => {
     if (openHere) {
         recipeBook.openAt(openHere);
     }
+    
+    // refresh the dataset with the content of current book
+    recipes = pageContent;
 };
 
 
@@ -262,7 +285,7 @@ const closeSearchMode = () => {
     dom.header.innerHTML = "<h2>Build a Recipe Box</h2>";
 };
 
-//  --------------------    add click event to the left side menu   --------------------    :
+//  --------------------    add click event to the left side menu   --------------------
 dom.recipesMenu.addEventListener("click", () => {
     activeBook = updateBook.changeBook(activeBook, recipeBook);
     dom.header.innerHTML = "<h2>All recipes</h2>";
@@ -280,3 +303,35 @@ dom.search.addEventListener("click", search);
 dom.closeSearchMode.addEventListener("click", closeSearchMode);
 
 dom.addRecipe.addEventListener("click", addNewRecipe);
+
+//  --------------------    add click event to the right side menu to filter the recipe book content   --------------------
+dom.allCategories.forEach(button => button.addEventListener("click", () => {
+    // create new recipe book with the choosed category:
+    const elementId = event.target.id;
+    
+    const filterBook = (dataset) => {
+        closeSearchMode();
+        refreshRecipeBook(dataset);
+    };
+//    console.log(event);
+    recipes = JSON.parse(localStorage.getItem("myRecipes")); // need to refresh the dataset;
+    if (event.target.classList[1] === "activeCategory") {
+        console.log("show all recipes");
+        dom.allCategories.forEach(category => {
+            category.classList.remove("activeCategory", "passiveCategory");
+        });
+        filterBook(recipes);
+    } else {
+        // style the passivised categories:
+        dom.allCategories.forEach(category => {
+            if (category.id !== elementId) {
+                category.classList.remove("activeCategory");
+                category.classList.add("passiveCategory");
+            } else {
+                category.classList.remove("passiveCategory");
+                category.classList.add("activeCategory");
+            }
+        });
+        filterBook(recipes.filter(recipe => recipe.category === elementId));
+    }
+}));
