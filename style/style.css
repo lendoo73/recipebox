@@ -1,3 +1,8 @@
+/* How to get css variable value with javascript:
+console.log(getComputedStyle(document.documentElement).getPropertyValue("--textColor"));
+   How to set css variable value with javascript:
+document.documentElement.style.setProperty("--textColor", "pink");
+*/
 * {
     --backgroundColor: #191966;
     box-sizing: border-box;
@@ -68,6 +73,7 @@ nav.right .menu {
     color: white;
     font-size: 20px;
     transition: 0.3s;
+    cursor: pointer;
     
 }
 
@@ -112,7 +118,8 @@ nav.left .menu:hover,
     background-color: #007217;
 }
 
-/*  --------------------    right side navigation    --------------------    */
+/*  --------------------    right side navigation - Categories   --------------------    */
+
 nav.right .menu {
     padding: 0px 2px 0px 2px;
     right: -203px;
@@ -122,8 +129,10 @@ nav.right .menu {
     text-align: center;
 }
 
+
 nav.right .menu:hover, #salads:hover {
     right: 0;
+    filter: none;
 }
 
 /*  login  */
@@ -140,13 +149,13 @@ nav.right .menu:hover, #salads:hover {
 
 
 /*  recipes  */
-#breads {
+#bakery {
     top: 90px;
     background-color: #ffcc9a;
     color: brown;
 }
 
-#breads img, #desserts img {
+#bakery img, #desserts img {
 	width: 60px;
     height: 60px;
     margin: -5px;
@@ -173,6 +182,13 @@ nav.right .menu:hover, #salads:hover {
     background-color: var(--backgroundColor);
 }
 
+.activeCategory {
+    transform: scale(1.1);
+}
+
+.passiveCategory {
+    filter: sepia(100%);
+}
 /*  --------------------    searching mode    --------------------    */
 #searchInputContainer {
     display: flex;
@@ -258,13 +274,52 @@ nav.right .menu:hover, #salads:hover {
 	transition: 0.3s ease-in-out;
 }
 
-h1 {
+h1, h2 {
     text-align: center;
 }
 
 #book {
 	display: flex;
 }
+
+/* add visibility to the back/next button */
+.back-btn, .next-btn {
+	animation: colorChange 10s infinite;
+}
+
+@keyframes colorChange {
+    0% {color: white;}
+    50% {color: black;}
+    100% {color: white;}
+}
+
+/*  --------------------    alert Box    --------------------    */
+#alertBox {
+	display: none;
+    position: absolute;
+    top: 50%;
+    left: 25%;
+    opacity: 1;
+    font-size: 20px;
+    padding: 20px;
+    border: 1px solid black;
+    box-shadow: 7px 6px 13px 0px rgba(0, 0, 0, 0.8);
+    animation: fadeOut 5s ease-in;
+}
+
+@keyframes fadeOut {
+    0% {opacity: 1;}
+    100% {opacity: 0;}
+}
+
+.warning {
+    background-color: yellow;
+}
+
+.error {
+    background-color: indianred;
+}
+
 
 /*  --------------------    style scrollbar    --------------------    */
 /* width */
