@@ -14,6 +14,7 @@ class FlipBook {
         this.endTranslate = null;
         this.shadow = `7px 6px 13px 0px rgba(0, 0, 0, 0.8)`;
         this.currentSheet = 1;
+        this.currentPage = 0;
         this.executable = () => {
 //            console.log("this function will be call when flip the book");
         };
@@ -147,10 +148,6 @@ class FlipBook {
         }
         
         // Add click event to the Cover to open the book:
-        console.log("z-index issue???", this.book.cover);
-        console.log("right-click on cover: -> inspect Element", this.book.cover);
-        console.log("this is the sheet 5, but z-index looks all right!", this.book.cover);
-        console.log(this.book.cover.parentElement.style.zIndex);
         this.book.cover.addEventListener("click", () => {
             this.nextSheet(); 
         });
@@ -234,9 +231,9 @@ class FlipBook {
     }
     
     nextSheet() {
+        this.currentPage +=2;
         // hide the next button on the current page:
         document.querySelector(`#page${this.book.timestamp}-${this.currentSheet} .next-btn`).style.display = "none";
-        this.executable();
         if (!(this.opened)) {
             // book was closed, open it:
             this.openBook(this.openTranslate);
@@ -244,6 +241,7 @@ class FlipBook {
             // it was the last page => end of the book:
             this.closeBook(this.endTranslate);
         }
+        this.executable();
         const style = {
             transform: "rotateY(-180deg)",
             zIndex: this.currentSheet,
@@ -253,10 +251,10 @@ class FlipBook {
     }
     
     prevSheet() {
+        this.currentPage -=2;
         this.currentSheet --;
         // show the next button on the previous page:
         document.querySelector(`#page${this.book.timestamp}-${this.currentSheet} .next-btn`).style.display = "block";
-        this.executable();
         if (this.currentSheet === 1) {
             // book was opened, close it:
             this.closeBook(0);
@@ -264,6 +262,7 @@ class FlipBook {
             // open from backside:
             this.openBook(this.openTranslate);
         }
+        this.executable();
         const style = {
             transform: "rotateY(0deg)",
             zIndex: this.sheet + 1 - this.currentSheet,

@@ -36,7 +36,7 @@ export let dataset = [
     },
     {
         id: id ++,
-        name : "Garlic Chicken",
+        name: "Garlic Chicken",
         category: "mainDishes",
         content: {
             ingredients: [
@@ -64,7 +64,7 @@ export let dataset = [
     },
     {
         id: id ++,
-        name : "Artichoke Dip",
+        name: "Artichoke Dip",
         category: "mainDishes",
         content: {
             ingredients: [
@@ -103,7 +103,7 @@ export let dataset = [
     },
     {
         id: id ++,
-        name : "Lime Chicken Tacos",
+        name: "Lime Chicken Tacos",
         category: "mainDishes",
         content: {
             ingredients: [
@@ -140,7 +140,7 @@ export let dataset = [
     },
     {
         id: id ++,
-        name : "Easy Chocolate Pie",
+        name: "Easy Chocolate Pie",
         category: "desserts",
         content: {
             ingredients: [
@@ -170,7 +170,7 @@ export let dataset = [
     },
     {
         id: id ++,
-        name : "Roquefort & walnut rolls",
+        name: "Roquefort & walnut rolls",
         category: "bakery",
         content: {
             ingredients: [
@@ -202,7 +202,7 @@ export let dataset = [
     },
     {
         id: id ++,
-        name : "Egyptian egg salad",
+        name: "Egyptian egg salad",
         category: "salads",
         content: {
             ingredients: [
@@ -237,7 +237,7 @@ export let dataset = [
     },
     {
         id: id ++,
-        name : "Spring minestrone",
+        name: "Spring minestrone",
         category: "soups",
         content: {
             ingredients: [
@@ -273,7 +273,7 @@ export let dataset = [
     }
 ],
     newRecipe = {
-        id: null,
+        id: id ++,
         name: "My new recipe",
         category: "mainDishes",
         content: {

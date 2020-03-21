@@ -1,13 +1,15 @@
 "use strict";
 import {FlipBook} from "./flipbook.js";
 import {dataset, newRecipe} from "./dataset.js";
+import * as loginSignUp from "./loginbook.js";
+import {Validate} from "./validate.js";
 import {callAJAX} from "./ajax.js";
 import * as updateBook from "./updatebook.js";
 import * as searching from "./searching.js";
 import {updateFooter} from "./footer.js";
 
 let activeBook = "recipeBook", // to control wich book will be opened
-    coverContent,                   // to fill the book cover
+    content,
     recipeBook = {},
     searchMode = false,
     recipes = dataset
@@ -23,38 +25,17 @@ const dom = {
     closeSearchMode: document.getElementById("closeSearchMode"),
     addRecipe: document.getElementById("addRecipe")
 };
-
 if (typeof(Storage) !== undefined) {
 //    console.log("storage usable");
     if (!(localStorage.getItem("myRecipes"))) {
         localStorage.setItem("myRecipes", JSON.stringify(recipes));
     }
     recipes = JSON.parse(localStorage.getItem("myRecipes"));
+    newRecipe.id = recipes.length;
 } else {
     // inform the user if the browser not support webstorage:
     updateBook.sendAlert("Sorry! No Web Storage supported...", "error");
 } 
-
-
-//  --------------------    Login book    --------------------   
-dom.loginBook.style.display = "none";
-
-const loginBook = new FlipBook("#loginBook");
-loginBook.createBook({
-    page: 4,
-    width: "40vw",
-    height: "80vh"
-});
-
-coverContent = `
-    <div>
-        <div class="rounded-border" >
-            <img id="loginCover" src="image/login.png" />
-        </div>
-        <h1>What shall I cook?</h1>
-    </div>
-`;
-loginBook.addContent("cover", coverContent);
 
 //  --------------------    Recipe book    -------------------- 
 // coverContent: string, pageContent: array, openHere: number (optional)
@@ -210,8 +191,6 @@ const refreshRecipeBook = (pageContent, openHere = null) => {
 const addNewRecipe = () => {
     const last = recipes.length - 1;
     dom.header.innerHTML = "<h2>Add new recipes</h2>";
-    console.log(recipes[last].content.ingredients);
-    console.log(recipes[last].content.ingredients.length);
     if (recipes[last].content.ingredients.length) {
         recipes.push(newRecipe);
     }
@@ -289,12 +268,24 @@ const closeSearchMode = () => {
 dom.recipesMenu.addEventListener("click", () => {
     activeBook = updateBook.changeBook(activeBook, recipeBook);
     dom.header.innerHTML = "<h2>All recipes</h2>";
-    console.log("recipeBook", recipeBook);
-    console.log("currentSheet", recipeBook.currentSheet);
     refreshRecipeBook(recipes, (recipeBook.currentSheet * 2) - 2);
 });
+let isCompleteLoginBook = false,
+    loginBook;
 dom.loginMenu.addEventListener("click", () => {
-    activeBook = updateBook.changeBook(activeBook, loginBook); 
+    if (!(isCompleteLoginBook)) {
+        loginBook = loginSignUp.createLoginBook({
+            FlipBook,
+            Validate
+        });
+    }
+    activeBook = updateBook.changeBook(activeBook, loginBook);
+    if (loginBook.currentSheet < 2) {
+        setTimeout(() => {
+            loginBook.nextSheet();
+        }, 500);
+    }
+    isCompleteLoginBook = true;
 });
 
 // open searchMode

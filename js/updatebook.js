@@ -1,8 +1,12 @@
 "use strict";
-const header = document.querySelector("body header h2");
 
 export const changeBook = (activeBook, openBook) => {
-    if (activeBook !== openBook) {
+    const header = document.querySelector("body header h2");
+    const translateAtChange = translate => {
+        openBook.container.firstElementChild.style.transform = `translate(${translate}, 0)`;
+    };
+    
+    if (activeBook.container.id !== openBook.container.id) {
         const books = {
             loginBook: {
                 book: document.getElementById("loginBook"),
@@ -32,9 +36,11 @@ export const changeBook = (activeBook, openBook) => {
         }, 50);
         setTimeout(() => {
             if (openBook.opened) {
-                openBook.container.firstElementChild.style.transform = `translate(${openBook.openTranslate}, 0)`;
+                translateAtChange(openBook.openTranslate);
+            } else if (openBook.currentSheet > 1) {
+                translateAtChange(openBook.endTranslate); // closed at backside
             } else {
-                openBook.container.firstElementChild.style.transform = "translateY(0)";
+                translateAtChange(0);
             }
             books[openBook.container.id].menu.classList.remove("hide");
         }, 150);
@@ -76,15 +82,17 @@ const createIngredientsList = ingredientsArray => {
     return ingredientsList;
 }
 
-export const sendAlert = (message, type) => {
+export const sendAlert = (message, type, fade = 5000) => {
     const alertBox = document.getElementById("alertBox");
     alertBox.className = "";
     alertBox.style.display = "block";
     alertBox.innerHTML = message;
     alertBox.classList.add(type);
-    setTimeout(() => {
-        alertBox.style.display = "none";
-    }, 5000);
+    if (fade) {
+        setTimeout(() => {
+            alertBox.style.display = "none";
+        }, fade);
+    }
 };
     
 
@@ -93,7 +101,8 @@ export const editRecipe = (recipes, recipeIndex) => {
 //    console.log(event);
     const dom = {
         body: document.querySelector("body"),
-        headerContainer: document.querySelector("header")
+        headerContainer: document.querySelector("header"),
+        header: document.querySelector("body header h2")
     };
     
     const currentRecipe = recipes[recipeIndex];
@@ -114,7 +123,7 @@ export const editRecipe = (recipes, recipeIndex) => {
           recipeName = rightContentContainer.children[1],
           selectCategory = rightContentContainer.children[2],
           ingredients = rightContentContainer.children[4],
-          directions = rightContentContainer.children[5],
+          directions = rightContentContainer.children[6],
           leftSideContent = rightPage.previousElementSibling.children[1].children[0]
     ;
     
@@ -140,7 +149,7 @@ export const editRecipe = (recipes, recipeIndex) => {
                 currentRecipe.name = updated;
                 refreshStorage(currentRecipe);
                 event.target.innerText = updated;
-                header.textContent = "The name has been changed.";
+                dom.header.textContent = "The name has been changed.";
             } else {
                 event.target.innerText = currentRecipe.name;
                 sendAlert("The name cannot be left blank!", "warning");
@@ -260,9 +269,9 @@ export const editRecipe = (recipes, recipeIndex) => {
     const hoverDeleteIngredients = () => {
         dom.headerContainer.classList.toggle("delete-mode-on");
         if (event.type === "mouseover") {
-            header.textContent = "Are you sure You want to DELETE this row?";
+            dom.header.textContent = "Are you sure You want to DELETE this row?";
         } else {
-            header.textContent = "Edite mode: ON";
+            dom.header.textContent = "Edite mode: ON";
         }
     };
     
@@ -273,7 +282,7 @@ export const editRecipe = (recipes, recipeIndex) => {
         refreshStorage(currentRecipe);
         // refresh table:
         ingredientsTable();
-        header.textContent = "Edite mode: ON";
+        dom.header.textContent = "Edite mode: ON";
         dom.headerContainer.classList.toggle("delete-mode-on");
     };
     
@@ -400,7 +409,6 @@ export const editRecipe = (recipes, recipeIndex) => {
     dom.table = document.querySelector("[id^=content] ul table");
     directions.classList.toggle("editable");
     editContainer.classList.toggle("edit-mode-on"); // move top left the edit icon
-    dom.header = header;
     dom.headerContainer.classList.toggle("edit-mode-on");
     if (editIcon.dataset.editmode === "off") {
         nextButton.style.display = "none"; // class hide cannot to use because the flip-book class use display property
@@ -450,7 +458,7 @@ export const editRecipe = (recipes, recipeIndex) => {
         recipeName.setAttribute("contenteditable", true); // Name of recipe        
         directions.setAttribute("contenteditable", true); // directions
         // change header:
-        header.textContent = "Edite mode: ON";
+        dom.header.textContent = "Edite mode: ON";
         
         // add listener to check if the user click outside of the book: --> editmode off:
         window.onclick = closeEditMode;
@@ -541,16 +549,18 @@ export const editRecipe = (recipes, recipeIndex) => {
         recipeName.setAttribute("contenteditable", false); 
         ingredients.setAttribute("contenteditable", false); 
         directions.setAttribute("contenteditable", false);
-        header.innerHTML = "Build a Recipe Box";
+        dom.header.innerHTML = "Build a Recipe Box";
     }
 };
 
 //  -----------------------------------    Delete recipe    -----------------------------------  
 export const deleteRecipe = (recipes, recipeIndex) => {
-//    console.log(event);
+    console.log(event);
     
     const dom = {
         headerContainer: document.querySelector("header"),
+        header: document.querySelector("body header h2"),
+        alertBox: document.getElementById("alertBox"),
         rightPage: event.target.parentElement.parentElement.parentElement.parentElement.parentElement,
         rightInnerContaniner: event.target.parentElement.parentElement.parentElement.parentElement,
         rightContentContainer: event.target.parentElement.parentElement.parentElement,
@@ -558,9 +568,7 @@ export const deleteRecipe = (recipes, recipeIndex) => {
         editIconContainer: event.target.offsetParent.firstElementChild,
         deleteIcon: event.target,
         modalHack: document.querySelector(".modalHack")
-    };
-    
-    const currentRecipe = recipes[recipeIndex];
+    },  currentRecipe = recipes[recipeIndex];
     
     dom.backButton = dom.rightPage.previousElementSibling.children[1].children[1];
     dom.nextButton = dom.rightInnerContaniner.children[1];
@@ -572,18 +580,29 @@ export const deleteRecipe = (recipes, recipeIndex) => {
     dom.editContainer.classList.toggle("delete-mode-on"); // move top right the delete icon
     
     const deleteModeEnd = () => {
+        
         dom.deleteIcon.dataset.deletemode = "off";
         dom.editIconContainer.style.width = "50px";
         dom.nextButton.style.display = "block";
-        header.innerHTML = "Build a Recipe Box";
+        dom.header.innerHTML = "Build a Recipe Box";
+        alertBox.style.display = "none";
         window.onclick = "";
     };
-    
     if (dom.deleteIcon.dataset.deletemode === "off") {
         dom.deleteIcon.dataset.deletemode = "on";
         dom.editIconContainer.style.width = 0;
         dom.nextButton.style.display = "none";
-        header.innerHTML = "Are you sure you want to delete this recipe? Click here to delete";
+        sendAlert(`
+            <p style="color: white;">Are you sure you want to delete this recipe?<p>
+            <button id="deleteRecipeButton">Delete ${currentRecipe.name}</button> `, "error", 0);
+        dom.deleteRecipeButton = document.getElementById("deleteRecipeButton");
+        dom.deleteRecipeButton.addEventListener("click", () => {
+            dom.deleteIcon.click();
+        });
+        dom.deleteRecipeButton.style.color = currentRecipe.content.styleContent.color;
+        dom.deleteRecipeButton.style.backgroundColor = currentRecipe.content.stylePage.backgroundColor;
+        alertBox.style.animationPlayState = "paused";
+        dom.header.innerHTML = "Delete recipe";
         
         // add listener to check if the user click outside of the book: --> delete mode off:
         const closeDeleteMode = () => {
@@ -604,7 +623,7 @@ export const deleteRecipe = (recipes, recipeIndex) => {
         deleteModeEnd();
         // delete the recipe now:
         recipes.splice(recipeIndex, 1);
-        refreshStorage(currentRecipe);
+        localStorage.setItem("myRecipes", JSON.stringify(recipes));
         document.getElementById("closeSearchMode").click(); // to close search mode
         recipes = JSON.parse(localStorage.getItem("myRecipes"));
         return true;
@@ -614,8 +633,6 @@ export const deleteRecipe = (recipes, recipeIndex) => {
 // refresh the local storage:
 const refreshStorage = currentRecipe => {
     const myRecipes = JSON.parse(localStorage.getItem("myRecipes"));
-    console.log("myRecipes", myRecipes);
-    console.log("currentRecipe", currentRecipe);
     // current recipe validation before saving:
     if (currentRecipe.name !== "My new recipe" &&
         currentRecipe.content.ingredients.length &&
