@@ -54,7 +54,7 @@ class Validate {
         ;
         
         const removeComment = part => {
-            // remove comment from the begining of part:
+            // remove comment from the part:
             if (part[0] === "(" ||
                 part[part.length - 1] === ")") {
                 part = part.replace(/\(.*\)/, "");
