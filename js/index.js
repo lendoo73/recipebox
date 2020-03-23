@@ -270,13 +270,16 @@ dom.recipesMenu.addEventListener("click", () => {
     dom.header.innerHTML = "<h2>All recipes</h2>";
     refreshRecipeBook(recipes, (recipeBook.currentSheet * 2) - 2);
 });
+
 let isCompleteLoginBook = false,
     loginBook;
+
 dom.loginMenu.addEventListener("click", () => {
     if (!(isCompleteLoginBook)) {
         loginBook = loginSignUp.createLoginBook({
             FlipBook,
-            Validate
+            Validate,
+            callAJAX
         });
     }
     activeBook = updateBook.changeBook(activeBook, loginBook);

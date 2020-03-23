@@ -231,6 +231,7 @@ class FlipBook {
     }
     
     nextSheet() {
+        document.getElementById(this.getContentId(this.currentPage)).style.display = "none";
         this.currentPage +=2;
         // hide the next button on the current page:
         document.querySelector(`#page${this.book.timestamp}-${this.currentSheet} .next-btn`).style.display = "none";
@@ -253,6 +254,7 @@ class FlipBook {
     prevSheet() {
         this.currentPage -=2;
         this.currentSheet --;
+        document.getElementById(this.getContentId(this.currentPage)).style.display = this.currentPage === 0 ? "flex" : "block" ;
         // show the next button on the previous page:
         document.querySelector(`#page${this.book.timestamp}-${this.currentSheet} .next-btn`).style.display = "block";
         if (this.currentSheet === 1) {
@@ -272,15 +274,14 @@ class FlipBook {
     
     openAt(page) {
         const sheet = this.getSheet(page);
-        if (sheet === 1 && !(this.opened)) return this.nextSheet();
-        if (sheet === this.currentSheet) return this.nextSheet();
-        if (sheet >= this.currentSheet) {
-            this.nextSheet();
-            this.openAt(page);
-        }
-        if (sheet <= this.currentSheet) {
-            this.prevSheet();
-            this.openAt(page);
+        if (this.currentPage > page) {
+            do {
+                this.prevSheet();
+            } while (this.currentPage > page)
+        } else if (this.currentPage < page) {
+            do {
+                this.nextSheet();
+            } while (this.currentPage < page)
         }
     }
     
@@ -311,7 +312,7 @@ class FlipBook {
     
     getContentId(page) {
         let id = null;
-        if (page === "cover") {
+        if (page === "cover" || page === 0) {
             id = `content${this.book.timestamp}-Cover`;
         } else if (page === "back") {
             id = `content${this.book.timestamp}-Back`;

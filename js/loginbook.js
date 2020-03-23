@@ -2,7 +2,8 @@
 export const createLoginBook = props => {
     const {
         FlipBook,
-        Validate
+        Validate,
+        callAJAX
     } = props;
     const signInBook = new FlipBook("#loginBook"),
           validateInput = new Validate(),
@@ -22,9 +23,29 @@ export const createLoginBook = props => {
     // -------------------- Functions --------------------
     const singleValidity = elem => {
         elem.classList.remove("validInput");
+        if (!(validateInput.error) && 
+            validateInput.signUpPasswordVal && 
+            validateInput.repeatPasswordVal) {
+            validateInput.confirmPassword(dom.signUpPassword.value, dom.repeatPassword.value);
+            elem.classList.add("validInput"); // add valid class before elem will be changed!
+            if (validateInput.error) elem = dom.repeatPassword;
+        }
         validateInput.removeMessageElement(elem.parentElement.children[1]);
         if (validateInput.error) {
             const errorElem = validateInput.createMessageElement("P", validateInput.error, elem.parentElement);
+            if (errorElem.innerText === "Repeat Password not confirmed.") {
+                // add eye to see wrong password
+                errorElem.innerHTML += `<span style="float: right; transform: scale(2); margin-top: -4px;">&#128065;</span>`;
+                errorElem.firstElementChild.addEventListener("mouseover", () => {
+                    dom.repeatPassword.type = "text";
+                    dom.signUpPassword.type = "text";
+                    
+                });
+                errorElem.firstElementChild.addEventListener("mouseout", () => {
+                    dom.repeatPassword.type = "password";
+                    dom.signUpPassword.type = "password";
+                });
+            }
             errorElem.style.cssText = `
                 font-size: 12px;
                 color: red;
@@ -36,13 +57,32 @@ export const createLoginBook = props => {
     };
     
     const finalValidity = () => {
-        if (validateInput.checkValidity("usernameVal", "loginPasswordVal")) {
-            dom.loginButton.classList.remove("invalidButton");
-            dom.loginButton.classList.add("validButton");
-        } else {
-            dom.loginButton.classList.remove("validButton");
-            dom.loginButton.classList.add("invalidButton");
+        const id = event.target.id;
+        if ((id === "repeatPassword" || id === "signUpPassword") &&
+             validateInput.signUpPasswordVal && validateInput.repeatPasswordVal) {
+            validateInput.confirmPassword(dom.signUpPassword.value, dom.repeatPassword.value);
+            singleValidity(dom.repeatPassword);
         }
+        const isValidAll = (array, button) => {
+            if (validateInput.checkValidity(...array)) {
+                button.classList.remove("invalidButton");
+                button.classList.add("validButton");
+                button.addEventListener("click", submit[button.id]);
+            } else {
+                button.classList.remove("validButton");
+                button.classList.add("invalidButton");
+                button.removeEventListener("click", submit[button.id]);
+            }
+        };
+        
+        if (id === "loginName" ||
+            id === "loginPassword") {
+            // login final validation:
+            isValidAll(["loginNameVal", "loginPasswordVal"], dom.loginButton);
+        } else {
+            isValidAll(["signUpNameVal", "emailVal", "signUpPasswordVal", "repeatPasswordVal", "passwordConfirmed"], dom.signUpButton);
+        }
+//        console.log(validateInput);
     };
     
     const focusForInput = elem => {
@@ -54,56 +94,46 @@ export const createLoginBook = props => {
         const input = event.target.id,
               elem = document.getElementById(input)
         ;
-        userInput[input] = validateInput[input](event.target.value);
         singleValidity(dom[input]);
         elem.removeEventListener("keyup", keyUpForInput);
         elem.removeEventListener("blur", blurForInput);
-        console.log(validateInput);
     };
     
     const keyUpForInput = () => {
-        const elem = event.target.id;
-//        console.log(elem);
-//        console.log("keyup validity", Boolean(validateInput[elem](event.target.value)));
-        if (validateInput[elem](event.target.value)) {
-            dom[elem].classList.add("validInput");
+        const id = event.target.id;
+        if (validateInput[id](event.target.value)) {
+            // input valid:
+            dom[id].classList.add("validInput");
+            validateInput.removeMessageElement(dom[id].parentElement.children[1]); // remove error message
             finalValidity();
         } else {
-            dom[elem].classList.remove("validInput");
-            dom.loginButton.classList.remove("validButton");
-            dom.loginButton.classList.add("invalidButton");
+            // input invalid:
+            dom[id].classList.remove("validInput");
+            const button = id === "loginName" || id === "loginPassword" 
+                ? "loginButton"
+            : "signUpButton";
+            dom[button].classList.add("invalidButton");
+            dom[button].classList.remove("validButton");
+            dom[button].removeEventListener("click", submit[button]); // remove click event from the submit button
         }
     };
     
-    signInBook.executable = () => {
-        
-        const timeOut = callback => {
-            setTimeout(() => {
-                callback();
-            }, 100);
-        };
-        
-        if (event) {
-            let page;
-            if (event.target.className === "next-btn") {
-                page = event.target.parentElement;
-                timeOut(() => page.classList.add("hide"));
-            } else if (event.target.className === "back") {
-                // bugfix when open from back
-                page = event.target.parentElement.firstElementChild;
-                timeOut(() => page.classList.remove("hide"));
-            } else {
-                page = event.target.parentElement.offsetParent.firstElementChild;
-                timeOut(() => page.classList.remove("hide"));
+    const submit = {
+        loginButton: () => {
+            console.log("login submitted");
+        },
+        signUpButton: () => {
+            console.log("signup submitted");
+            const dataset = {
+                signUpName: dom.signUpName.value,
+                email: dom.email.value,
+                password: dom.signUpPassword.value,
             }
+            console.log(dataset);
         }
     };
     
-    let userInput = {
-        username: null,
-        password: null
-    }, content
-    ;
+    let content;
     
     signInBook.createBook({
         page: 4,
@@ -135,7 +165,7 @@ export const createLoginBook = props => {
         <div class="loginContainer">
             <h2>Login Manually</h2>
             <div id="formContainer">
-                <p><input type="text" id="username" name="username" placeholder="Username" required="required" /></p>
+                <p><input type="text" id="loginName" name="loginName" placeholder="Username" required="required" /></p>
                 <p><input type="password" id="loginPassword" name="loginPassword" placeholder="Password" required="required" /></p>
                 <p><input type="submit" id="loginButton" value="Login" /></p>
             </div>
@@ -148,7 +178,6 @@ export const createLoginBook = props => {
         backgroundColor: "beige"
     });
     signInBook.getContentContainer(2).nextElementSibling.innerHTML = "Sign Up";
-    dom.loginContainerManually = document.querySelectorAll(".loginContainer")[1];
 
     // page 3, sign up:
     content = `
@@ -173,12 +202,14 @@ export const createLoginBook = props => {
         <div class="registrationContainer">
             <h2>Create an account</h2>
             <div id="formContainer">
+                <label for="signUpName">Username</label>
+                <p><input type="text" id="signUpName" name="signUpName" placeholder="Username" required="required" /></p>
                 <label for="email">Email</label>
                 <p><input type="email" id="email" name="email" placeholder="Enter Email" required="required" /></p>
-                <label for="password">Password</label>
-                <p><input type="password" name="password" placeholder="Enter Password" required="required" /></p>
+                <label for="signUpPassword">Password</label>
+                <p><input type="password" id="signUpPassword" name="signUpPassword" placeholder="Enter Password" required="required" /></p>
                 <label for="repeatPassword">Repeat Password</label>
-                <p><input type="password" name="repeatPassword" placeholder="Repeat Password" required="required" /></p>
+                <p><input type="password" id="repeatPassword" name="repeatPassword" placeholder="Repeat Password" required="required" /></p>
                 <p><input type="submit" id="signUpButton" value="Register" /></p>
             </div>
         </div>
@@ -196,31 +227,16 @@ export const createLoginBook = props => {
     
     // Add click event to the right menu
     dom.login.addEventListener("click", () => {
-        dom.loginContainerManually.classList.remove("hide");
         signInBook.openAt(2);
     });
     dom.register.addEventListener("click", () => {
         signInBook.openAt(4);
     });
-
-    // validate login input:
-    dom.username = document.getElementById("username");
-    dom.username.addEventListener("focus", () => {
-        focusForInput(dom.username);
-    });
-
-    dom.loginPassword = document.getElementById("loginPassword");
-    dom.loginPassword.addEventListener("focus",  () => {
-        focusForInput(dom.loginPassword);
-    });
     
-    
-    
-    // validate sign up input:
-    // validate email:
-    dom.email = document.getElementById("email");
-    dom.email.addEventListener("focus", () => {
-        focusForInput(dom.email);
+    // add event listeners to the user inputs:
+    ["loginName", "loginPassword", "signUpName", "email", "signUpPassword", "repeatPassword"].forEach(id => {
+        dom[id] = document.getElementById(id);
+        dom[id].addEventListener("focus", () => focusForInput(dom[id]));
     });
     
     return signInBook;

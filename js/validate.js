@@ -3,37 +3,75 @@
 class Validate {
     constructor() {
         this.error = null;
-        this.usernameVal = false;
-        this.loginPasswordVal = false;
+        this.loginNameVal = false;
+        this.signUpNameVal = false;
         this.emailVal = false;
+        this.loginPasswordVal = false;
+        this.signUpPasswordVal = false;
+        this.repeatPasswordVal = false;
+        this.passwordConfirmed = false;
     }
     
-    username(name, length = 1) {
+    username(val, name, length = 1) {
         this.error = null;
         name = this.trimInput(name);
         if (name.length < length) {
-            this.usernameVal = false;
+            this[val + "Val"] = false;
             this.error = "Username too short.";
             return null;
         }
-        this.usernameVal = true;
+        this[val + "Val"] = true;
         return name;
     }
     
+    loginName(name, length = 1) {
+        return this.username("loginName", name, length);
+    }
+    
+    signUpName(name, length = 1) {
+        return this.username("signUpName", name, length);
+    }
+    
     loginPassword(password, length = 6, digit = false) {
+        return this.passWord("loginPassword", password, length, digit);
+    }
+    
+    signUpPassword(password, length = 6, digit = false) {
+        password = this.passWord("signUpPassword", password, length, digit);
+        return password;
+    }
+    
+    repeatPassword(password, length = 6, digit = false) {
+        password = this.passWord("repeatPassword", password, length, digit);
+        return password;
+    }
+    
+    passWord(val, password, length = 6, digit = false) {
         this.error = null;
         password = this.trimInput(password);
         const passwordLength = password.length;
         if (passwordLength < length) {
-            this.loginPasswordVal = false;
+            this[val + "Val"] = false;
             this.error = `Password too short. (${length - passwordLength} character${length - passwordLength > 1 ? "s" : " "} need more.)`;
             return null;
         }
         if (digit) {
 //            console.log("check digit");
         }
-        this.loginPasswordVal = true;
+        this[val + "Val"] = true;
         return password;
+    }
+    
+    confirmPassword(password, repeatPassword) {
+        password === repeatPassword 
+            ? this.passwordConfirmed = true
+        : this.passwordConfirmed = false;
+        if (!(this.passwordConfirmed)) {
+            // not confirmed
+            this.error = `Repeat Password not confirmed.`;
+            return null;
+        }
+        return this.passwordConfirmed;
     }
     
     email(email) {
