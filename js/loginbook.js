@@ -287,7 +287,7 @@ export const createLoginBook = props => {
     dom.signupFacebook = document.getElementById("signupFacebook");
     dom.signupFacebook.addEventListener("click", () => {
         const signup = new Social();
-        signup.facebook(647550782699077).then(data => {
+        signup.facebook(app id goes here).then(data => {
             addNameFromSocial(data.name);
             addEmailFromSocial(data.email);
             deleteAllKeyFromObj(socialId);
@@ -296,7 +296,7 @@ export const createLoginBook = props => {
     });
     
     const firebaseConfig = {
-        apiKey: "AIzaSyAiYXewFQDM7bGpiP9wZtlLOGzw4s54G8Q",
+        apiKey: "api key goes here",
         authDomain: "my-recipe-book-1586110176619.firebaseapp.com",
         databaseURL: "https://my-recipe-book-1586110176619.firebaseio.com",
         projectId: "my-recipe-book-1586110176619",
