@@ -1,15 +1,17 @@
 "use strict";
+
 export const createLoginBook = props => {
     const {
         FlipBook,
         Validate,
-        callAJAX
+        callAJAX,
+        Social
     } = props;
     const signInBook = new FlipBook("#loginBook"),
           validateInput = new Validate(),
           dom = {
               login: document.getElementById("login"),
-              register: document.getElementById("register"),
+              register: document.getElementById("register")
           },
           coverContent = `
             <div>
@@ -26,6 +28,7 @@ export const createLoginBook = props => {
         if (!(validateInput.error) && 
             validateInput.signUpPasswordVal && 
             validateInput.repeatPasswordVal) {
+            console.log
             validateInput.confirmPassword(dom.signUpPassword.value, dom.repeatPassword.value);
             elem.classList.add("validInput"); // add valid class before elem will be changed!
             if (validateInput.error) elem = dom.repeatPassword;
@@ -56,8 +59,7 @@ export const createLoginBook = props => {
         }
     };
     
-    const finalValidity = () => {
-        const id = event.target.id;
+    const finalValidity = (id) => {
         if ((id === "repeatPassword" || id === "signUpPassword") &&
              validateInput.signUpPasswordVal && validateInput.repeatPasswordVal) {
             validateInput.confirmPassword(dom.signUpPassword.value, dom.repeatPassword.value);
@@ -101,11 +103,16 @@ export const createLoginBook = props => {
     
     const keyUpForInput = () => {
         const id = event.target.id;
-        if (validateInput[id](event.target.value)) {
+        const value = event.target.value;
+        checkInput(id, value);
+    };
+    
+    const checkInput = (id, value) => {
+        if (validateInput[id](value)) {
             // input valid:
             dom[id].classList.add("validInput");
             validateInput.removeMessageElement(dom[id].parentElement.children[1]); // remove error message
-            finalValidity();
+            finalValidity(id);
         } else {
             // input invalid:
             dom[id].classList.remove("validInput");
@@ -118,18 +125,36 @@ export const createLoginBook = props => {
         }
     };
     
+    let socialId = {};
+    
     const submit = {
         loginButton: () => {
             console.log("login submitted");
         },
         signUpButton: () => {
             console.log("signup submitted");
-            const dataset = {
-                signUpName: dom.signUpName.value,
+            
+            const data = {
+                username: dom.signUpName.value,
                 email: dom.email.value,
                 password: dom.signUpPassword.value,
+                socialId: socialId
             }
-            console.log(dataset);
+            
+            const AJAXProps = {
+                url: "php/signup.php",
+                header: {
+                    "Content-type": "application/x-www-form-urlencoded"
+                },
+                data: `data=${JSON.stringify(data)}`,
+                type: "text",
+                method: "POST"
+            };
+//            console.log(AJAXProps.data);
+            callAJAX(AJAXProps).then(response => {
+                console.log("response", response); 
+//                console.log("response", JSON.parse(response)); 
+            });
         }
     };
     
@@ -148,9 +173,9 @@ export const createLoginBook = props => {
         <div class="loginContainer">
             <h2>Login with Social Media</h2>
             <div>
-                <p><a href="#" class="fb btn">Login with Facebook</a></p>
-                <p><a href="#" class="twitter btn">Login with Twitter</a></p>
-                <p><a href="#" class="google btn">Login with Google+</a></p>
+                <p><a href="#" id="loginFacebook" class="fb btn">Login with Facebook</a></p>
+                <p><a href="#" id="loginTwitter" class="twitter btn">Login with Twitter</a></p>
+                <p><a href="#" id="loginGoogle" class="google btn">Login with Google+</a></p>
             </div>
         </div>
     `;
@@ -159,6 +184,8 @@ export const createLoginBook = props => {
     signInBook.stylePage(1, {
         backgroundColor: "#f2f2f2"
     });
+    
+    
 
     // page 2:
     content = `
@@ -184,9 +211,9 @@ export const createLoginBook = props => {
         <div class="signUpWithSocial">
             <h2>Sign Up with Social</h2>
             <div>
-                <p><img src="../icons/facebook.png" alt="facebook icon" /></p>
-                <p><img id="twitterIcon" src="../icons/twitter.png" alt="twitter icon" /></p>
-                <p><img src="../icons/google.svg" alt="google+ icon" /></p>
+                <p id="signupFacebook"><img src="icons/facebook.png" alt="facebook icon" /></p>
+                <p id="signupTwitter"><img id="twitterIcon" src="icons/twitter.png" alt="twitter icon" /></p>
+                <p id="signupGoogle"><img src="icons/google.svg" alt="google+ icon" /></p>
             </div>
         </div>
     `;
@@ -237,6 +264,68 @@ export const createLoginBook = props => {
     ["loginName", "loginPassword", "signUpName", "email", "signUpPassword", "repeatPassword"].forEach(id => {
         dom[id] = document.getElementById(id);
         dom[id].addEventListener("focus", () => focusForInput(dom[id]));
+    });
+    
+    // add event listeners to the social signup buttons:
+    
+    const addNameFromSocial = name => {
+        dom.signUpName.value = name;
+        checkInput("signUpName", name);
+    };
+    
+    const addEmailFromSocial = email => {
+        dom.email.value = email;
+        checkInput("email", email);
+    };
+    const deleteAllKeyFromObj = obj => {
+        for (let key in obj) {
+            delete obj[key];
+        }
+        return obj;
+    };
+    // facebook:
+    dom.signupFacebook = document.getElementById("signupFacebook");
+    dom.signupFacebook.addEventListener("click", () => {
+        const signup = new Social();
+        signup.facebook(647550782699077).then(data => {
+            addNameFromSocial(data.name);
+            addEmailFromSocial(data.email);
+            deleteAllKeyFromObj(socialId);
+            socialId.facebook = data.id;
+        });
+    });
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyAiYXewFQDM7bGpiP9wZtlLOGzw4s54G8Q",
+        authDomain: "my-recipe-book-1586110176619.firebaseapp.com",
+        databaseURL: "https://my-recipe-book-1586110176619.firebaseio.com",
+        projectId: "my-recipe-book-1586110176619",
+        storageBucket: "my-recipe-book-1586110176619.appspot.com",
+        messagingSenderId: "538531747473",
+        appId: "1:538531747473:web:32e81082ee25143f8b1130"
+    };
+    // twitter:
+    dom.signupTwitter = document.getElementById("signupTwitter");
+    dom.signupTwitter.addEventListener("click", () => {
+        const signup = new Social();
+        signup.twitter(firebaseConfig).then(data => {
+            addNameFromSocial(data.name);
+            if (data.email) addEmailFromSocial(data.email);
+            deleteAllKeyFromObj(socialId);
+            socialId.twitter = data.id;
+        });
+    });
+    
+    // google:
+    dom.signupGoogle = document.getElementById("signupGoogle");
+    dom.signupGoogle.addEventListener("click", () => {
+        const signup = new Social();
+        signup.google(firebaseConfig).then(data => {
+            addNameFromSocial(data.name);
+            if (data.email) addEmailFromSocial(data.email);
+            deleteAllKeyFromObj(socialId);
+            socialId.google = data.id;
+        });
     });
     
     return signInBook;
